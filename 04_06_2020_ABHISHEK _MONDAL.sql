@@ -17,8 +17,8 @@ CREATE TABLE p (
 );
 
 CREATE TABLE sp (
-  s_no     NUMBER(5) REFERENCES s (s_no),
-  p_no     NUMBER(5) REFERENCES p (p_no),
+  s_no     NUMBER(5) REFERENCES s (s_no) ON DELETE CASCADE ,
+  p_no     NUMBER(5) REFERENCES p (p_no) ON DELETE CASCADE ,
   quantity NUMBER(4),
   project  VARCHAR2(20)
 );
@@ -35,7 +35,7 @@ INSERT INTO p VALUES (1, 20, 'Red', 10000, 12000);
 INSERT INTO p VALUES (2, 12, 'Brown', 7000, 8000);
 INSERT INTO p VALUES (3, 25, 'Orange', 12000, 15000);
 INSERT INTO p VALUES (4, 5, 'Brown', 2000, 3000);
-INSERT INTO p VALUES (5, 10, 'Red', 4000, 6000);
+INSERT INTO p VALUES (5, 10, 'Red', 400, 1000);
 
 INSERT INTO sp VALUES (100, 1, 10, 'Housing');
 INSERT INTO sp VALUES (101, 2, 15, 'Housing');
@@ -66,7 +66,12 @@ FROM s
 WHERE s.s_city IN ('Burdwan', 'Asansol') AND sp.project = 'Housing';
 
 -- c) Find pair of suppliers who operate from same city.
-
+SELECT
+  s.s_name,
+  s.s_city
+FROM s
+GROUP BY (s.s_city, s.s_name)
+ORDER BY (s.s_city);
 
 -- d) Find the suppliers whose turnover is between Rs. 80 Lac to 95 Lac.
 SELECT *
@@ -81,18 +86,29 @@ FROM s
 WHERE p.color = 'Brown';
 
 -- f) List the part names costing below 500.
-SELECT p_no
+-- As there is no Part Name available in any of the tables so here
+-- Project name is using to determine the part name
+SELECT p.p_no, sp.project
 FROM p
-WHERE cost < 500;
+  INNER JOIN sp ON p.p_no = sp.p_no
+WHERE p.cost < 500;
 
 -- g) List the part names costing below 500 and color red.
-SELECT p_no
+-- As there is no Part Name available in any of the tables so here
+-- Project name is using to determine the part name
+SELECT p.p_no, sp.project
 FROM p
-WHERE cost < 500 AND color = 'Red';
+  INNER JOIN sp ON p.p_no = sp.p_no
+WHERE p.cost < 500 AND p.color = 'Red';
+
 
 -- h) List the sname for parts supplied by more than one supplier.
-SELECT s.s_name FROM s INNER JOIN sp ON s.s_no = sp.s_no GROUP BY (sp.s_no) HAVING COUNT(sp.p_no)>1 ;
-
-SELECT p_no FROM sp GROUP BY p_no HAVING COUNT(p_no)>1;
+SELECT s.s_name
+FROM s
+  INNER JOIN sp ON s.s_no = sp.s_no
+WHERE sp.p_no IN (select sp.p_no
+                  FROM sp
+                  GROUP BY (sp.p_no)
+                  HAVING COUNT(sp.p_no) > 1);
 
 
