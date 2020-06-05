@@ -1,4 +1,4 @@
--- <ABHISHEK MONDAL> [12001018036] -04-06-2020-  --
+-- <CODER Abhix> -04-06-2020-  --
 CREATE TABLE S (
   s_no     NUMBER(5),
   s_name   VARCHAR2(30),
